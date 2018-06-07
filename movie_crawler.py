@@ -1,22 +1,33 @@
 import requests
 import json
-
-
+from bs4 import BeautifulSoup  
+import re
 
 def get_pages(type,page_number):
-	page = requests.get("http://www.dytt8.net/html/gndy/dyzz/list_23_1.html")
+	dict_url = json.load(open("url_dict.json","r"))
+	page = requests.get(str(dict_url[type])+str(page_number)+".html")
 	page.encoding = "gb2312"
-	print(page.apparent_encoding)
-	print(page.text)
+	soup = BeautifulSoup(page.text,"lxml")
+	item_list = soup.find_all("a", class_="ulink")
+	for item in item_list:
+		print(item["href"])
+		pass
 	pass
+
+def movie_info(movie_url):
+	info = requests.get(movie_url)
+	info.encoding = "gb2312"
+	soup = BeautifulSoup(info.text,"lxml")
+	td = soup.find("div",id = "Zoom").td
+	
+	for x in td.contents:
+		print(x)
+	
+	image_list = soup.find_all("img",src=re.compile("jpg"))
 
 def loda_url():
 
-	f = open("url.json","r")
-	dict_url = json.load(f)
-
-	print(dict_url["2"])
-
+	dict_url = json.load(open("url_dict.json","r"))
 
 if __name__ == '__main__':
-	get_pages(1, 1)
+	movie_info("http://www.ygdy8.com/html/gndy/dyzz/20180429/56763.html")
